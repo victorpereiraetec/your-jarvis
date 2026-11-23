@@ -1,0 +1,15 @@
+{
+  "user": "seu-nome",
+  "mode": "auto",
+  "voice_reply": false,
+  "wake": false,
+  "clip": false,
+  "voice": "pt-BR-AntonioNeural",
+  "voice_rate": 8,
+  "providers": {
+    "groq":   { "key": "COLE_SUA_CHAVE_AQUI", "model": "openai/gpt-oss-120b", "on": false },
+    "gemini": { "key": "COLE_SUA_CHAVE_AQUI", "model": "gemini-2.5-flash",     "on": false }
+  },
+  "apps": {},
+  "hotkeys": { "mini": "ctrl+alt+j", "focus": "ctrl+alt+space" }
+}

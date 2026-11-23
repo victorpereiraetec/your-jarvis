@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Jarvis</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#000;--panel:#0a0a0b;--panel2:#141416;--line:#1f1f22;--line2:#2c2c31;--text:#ededf0;--mute:#7d7d86;--acc:#f0f0f2;--acc2:#1a1a1d;--ink:#0a0a0b;--ok:#3ddc84;--blue:#5b7cfa;--warn:#ff6b5e;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{display:flex;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI Variable","Segoe UI",system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:#35353b;color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#232327;border-radius:10px;border:3px solid #000}
+::-webkit-scrollbar-track{background:transparent}
+svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button{font:inherit;color:inherit;cursor:pointer}
+#side{width:220px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.brand{display:flex;gap:11px;align-items:center;padding:2px 8px 14px}
+.logo{width:42px;height:42px;border-radius:13px;background:#141416;border:1px solid var(--line2);display:grid;place-items:center;color:var(--acc)}
+.logo svg{width:22px;height:22px}
+.brand b{display:block;font-size:15px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.st{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:12px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px #3ddc8414}
+.dot.off{background:var(--warn);box-shadow:none}
+.nb{display:flex;gap:11px;align-items:center;padding:8px 10px;border-radius:10px;color:var(--mute);border:0;background:none;text-align:left;width:100%;font-size:13.5px}
+.nb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nb:hover{background:var(--panel2);color:var(--text)}
+.nb.on{background:var(--acc2);color:var(--acc)}
+.nb .n{margin-left:auto;font-size:11px;background:var(--panel2);border-radius:20px;padding:0 7px;color:var(--mute)}
+main{flex:1;overflow:auto;padding:28px 32px;min-width:0}
+h1{font-size:26px;letter-spacing:-.02em;font-weight:650}
+h2{font-size:15px;font-weight:600;margin-bottom:10px}
+.mute{color:var(--mute)}
+.small{font-size:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-top:20px}
+.col{display:flex;flex-direction:column;gap:16px}
+.chat{display:flex;flex-direction:column;height:calc(100vh - 175px);min-height:320px}
+.msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:12px}
+.m{max-width:84%;padding:9px 13px;border-radius:14px;background:var(--panel2);align-self:flex-start;white-space:pre-wrap;word-break:break-word}
+.m.u{align-self:flex-end;background:#1e1e22;color:#f6f6f8;border:1px solid #2a2a30;border-bottom-right-radius:4px}
+.m.a{border-bottom-left-radius:4px}
+.m i{display:block;font-style:normal;font-size:11px;color:var(--mute);margin-top:3px}
+.bar{display:flex;gap:8px}
+input,textarea,select{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px 13px;font:inherit;outline:none;min-width:0}
+input:focus,textarea:focus{border-color:var(--acc)}
+.bar input{flex:1}
+.go,.pri{background:var(--acc);color:var(--ink);border:0;border-radius:12px;padding:0 16px;font-weight:600;min-height:40px;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.pri:hover,.go:hover{background:#fff}
+.go{width:42px;padding:0;border-radius:50%}
+.ic{background:var(--panel2);border:1px solid var(--line);border-radius:50%;width:42px;height:42px;display:grid;place-items:center}
+.ic:hover{border-color:var(--acc);color:var(--acc)}
+.ic.rec{background:var(--acc2);border-color:var(--warn);color:var(--warn)}
+.sec{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:0 14px;min-height:40px}
+.sec:hover{border-color:var(--mute)}
+.danger:hover{color:var(--warn);border-color:var(--warn)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;display:block;width:100%}
+.stat:hover{border-color:var(--acc)}
+.stat b{font-size:26px;display:block;line-height:1.1}
+.ctl{display:flex;align-items:center;justify-content:center;gap:14px;margin:14px 0}
+.ctl .ic{width:44px;height:44px}
+.ctl .big{width:56px;height:56px;background:var(--acc);color:#0b1405;border:0}
+.ctl .big svg{width:22px;height:22px;fill:currentColor}
+input[type=range]{padding:0;width:100%;accent-color:var(--acc);background:none;border:0}
+.row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row .t{flex:1;min-width:0;word-break:break-word}
+.row .t.done{text-decoration:line-through;color:var(--mute)}
+.add{display:flex;gap:8px;margin:18px 0;flex-wrap:wrap}
+.add input{flex:1;min-width:160px}
+.badge{font-size:11px;border-radius:20px;padding:2px 9px;background:var(--acc2);color:var(--acc)}
+.badge.paid{background:#2c2417;color:#e8b64a}
+.bar2{height:9px;background:var(--panel2);border-radius:9px;overflow:hidden;margin:8px 0 18px}
+.bar2 i{display:block;height:100%;background:var(--acc);border-radius:9px;transition:width .4s}
+.banner{background:#0f0f11;border:1px solid var(--line2);color:var(--text);border-radius:14px;padding:13px 16px;margin:18px 0}
+.banner.bad{background:#170f0e;border-color:#3a1f1c;color:#ffb8ae}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.opt{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.opt.on{border-color:#4a4a52;background:#101012}
+.prov{margin-bottom:12px}
+.prov .h{display:flex;gap:10px;align-items:center;margin-bottom:4px}
+.prov .f{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.prov .a{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.tg{display:flex;align-items:center;gap:8px}
+.tg input{accent-color:var(--acc);width:16px;height:16px;padding:0}
+.vozbox{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.vrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vrow select{flex:1;min-width:220px}
+.vrate{display:flex;gap:12px;align-items:center;margin-top:12px}
+.vrate input{flex:1}
+.vrate b{font:12px ui-monospace,Consolas,monospace;color:var(--mute);min-width:44px;text-align:right}
+.sidefoot{margin-top:auto;border-top:1px solid var(--line);padding-top:6px;display:flex;flex-direction:column;gap:2px;flex:none}
+.sidefoot .nb{font-size:12.5px;padding:7px 10px}
+.sidefoot .nb svg{width:15px;height:15px}
+.sidefoot .n{font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:0}
+.sidefoot .sp{font-size:11px;padding:2px 10px 4px;display:flex;align-items:center}
+.log{white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,Consolas,monospace;color:#b9b9c0;max-height:calc(100vh - 240px);overflow:auto}
+.np{display:flex;gap:12px;align-items:center;margin:6px 0 4px}
+.np-art{width:56px;height:56px;border-radius:10px;background:var(--panel2) center/cover;border:1px solid var(--line);flex:none}
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:9}
+.toast{background:var(--panel2);border:1px solid var(--acc);border-radius:12px;padding:11px 15px;max-width:340px;box-shadow:0 8px 30px #000a}
+.empty{padding:26px 6px;color:var(--mute)}
+/* ---------- Meu PC ---------- */
+.pchead{display:flex;align-items:center;gap:12px}
+.pc-hero{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 15px 10px;min-width:0}
+.tile .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.tile .v{font-family:ui-monospace,Consolas,monospace;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.15;margin-top:5px;white-space:nowrap}
+.tile .v small{font-size:12px;color:var(--mute);font-weight:500;letter-spacing:0;margin-left:2px}
+.tile .s{font-size:11.5px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spark{display:block;width:100%;height:40px;margin-top:8px}
+.spark .line{fill:none;stroke:var(--acc);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.spark .area{fill:#ffffff10;stroke:none}
+.spark.blue .line{stroke:var(--blue)}
+.spark.blue .area{fill:#5b7cfa1f}
+.pc-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;margin-top:16px;align-items:start}
+.pc-grid .col{display:flex;flex-direction:column;gap:16px}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;min-width:0}
+.kv:last-child{border:0}
+.kv span{color:var(--mute);flex:none}
+.kv b{font-weight:550;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meter{height:7px;border-radius:7px;background:var(--panel2);overflow:hidden;margin:7px 0 9px}
+.meter i{display:block;height:100%;background:var(--acc);border-radius:7px;transition:width .5s}
+.cores{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:6px;margin-top:12px}
+.core{position:relative;height:38px;border-radius:7px;background:var(--panel2);overflow:hidden}
+.core i{position:absolute;left:0;right:0;bottom:0;height:0;background:#3c3c43;transition:height .4s}
+.core span{position:absolute;inset:0;display:grid;place-items:center;font:10px ui-monospace,Consolas,monospace;color:#d6d6dc}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;border:1px solid var(--line2);border-radius:20px;padding:3px 10px;color:var(--mute)}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px #3ddc8414}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+.tbl td{padding:6px 0;border-bottom:1px solid var(--line)}
+.tbl tr:last-child td{border:0}
+.tbl .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl .num{text-align:right;font-family:ui-monospace,Consolas,monospace;color:var(--mute);white-space:nowrap;padding-left:12px;width:88px}
+.tbl .bar_mini{width:76px;padding-left:10px}
+.tbl .bar_mini div{height:5px;border-radius:5px;background:var(--panel2);overflow:hidden}
+.tbl .bar_mini i{display:block;height:100%;background:#4a4a52;border-radius:5px}
+.subh{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:14px 0 2px}
+.subh:first-child{margin-top:0}
+.proc2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:980px){.proc2{grid-template-columns:1fr}}
+@media(max-width:1240px){.pc-hero{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1040px){.pc-grid{grid-template-columns:1fr}}
+@media(max-width:860px){#side{width:64px}.nb span,.brand div,.nb .n{display:none}.grid,.opts{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<aside id="side"></aside>
+<main id="main"></main>
+<div id="toasts"></div>
+<script>
+const TOKEN = "__TOKEN__";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function api(name, args = {}) {
+  try {
+    const r = await fetch("/api/" + name, {method: "POST", headers: {"X-Token": TOKEN, "Content-Type": "application/json"}, body: JSON.stringify(args)});
+    return await r.json();
+  } catch (e) { return {error: "Sem conexão com o app."}; }
+}
+const P = {
+  home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  layers:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  check:'<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+  repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  clip:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  monitor:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  cpu:'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',
+  mic:'<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
+  send:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  prev:'<polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>',
+  next:'<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>',
+  play:'<polygon points="5 3 19 12 5 21 5 3"/>',
+  pause:'<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
+  x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  bot:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/><circle cx="9" cy="13" r="1.2"/><circle cx="15" cy="13" r="1.2"/>'
+};
+const I = n => `<svg viewBox="0 0 24 24">${P[n]}</svg>`;
+const VIEWS = {
+  inicio:{t:"Início",i:"home"}, conversa:{t:"Conversa",i:"chat"},
+  memoria:{t:"Memória",i:"layers",kind:"memory"}, tarefas:{t:"Tarefas",i:"check",kind:"task"},
+  lembretes:{t:"Lembretes",i:"bell",kind:"reminder"}, habitos:{t:"Hábitos",i:"repeat",kind:"habit"},
+  timers:{t:"Timers",i:"clock"}, musica:{t:"Música",i:"music"},
+  copiados:{t:"Copiados",i:"clip",kind:"clip"}, rotinas:{t:"Rotinas",i:"zap",kind:"routine"},
+  ferramentas:{t:"Ferramentas",i:"cpu"}, pc:{t:"Meu PC",i:"monitor"}, cerebro:{t:"Cérebro",i:"cpu"}
+};
+const S = {view:"inicio", st:{counts:{}}, chat:[], busy:false, clips:{}, tick:null};
+
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; $("#toasts").append(d); setTimeout(()=>d.remove(),6000); }
+function fmt(ts){ return new Date(ts*1000).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }
+function mmss(s){ const h=Math.floor(s/3600),m=Math.floor(s%3600/60); return (h?h+":":"")+String(m).padStart(h?2:1,"0")+":"+String(s%60).padStart(2,"0"); }
+
+/* ---------- barra lateral ---------- */
+function side(){
+  const c=S.st.counts||{}, n={tarefas:c.tasks,lembretes:c.reminders,timers:c.timers};
+  const ok=!!S.st.brain, sp=!!S.st.spotify;
+  $("#side").innerHTML=`<div class="brand"><div class="logo">${I("bot")}</div><div><b>jarvis</b>
+    <span class="st"><span class="dot ${ok?"":"off"}"></span>${ok?(S.st.wake?"Ouvindo":"Pronto"):"Sem IA"}</span></div></div>`+
+    Object.entries(VIEWS).map(([k,v])=>`<button class="nb ${S.view===k?"on":""}" onclick="go('${k}')">${I(v.i)}<span>${v.t}</span>${n[k]?`<b class="n">${n[k]}</b>`:""}</button>`).join("")+
+    `<div class="sidefoot"><button class="nb" onclick="api('mini_toggle')">${I("monitor")}<span>Mini player</span><b class="n">c+a+J</b></button>
+     <div class="mute sp"><span class="dot ${sp?"":"off"}" style="margin-right:6px"></span>Spotify ${sp?"conectado":"offline"}</div></div>`;
+}
+async function refresh(){ S.st=await api("state"); side(); }
+async function go(v){ S.view=v; clearInterval(S.tick); side(); await R[v](); }
+
+/* ---------- chat ---------- */
+const msg=m=>`<div class="m ${m.role}">${esc(m.text)}${m.via&&m.via!=="local"?`<i>${esc(m.via)}</i>`:""}</div>`;
+function chatBox(){
+  return `<div class="card chat"><div class="msgs" id="msgs">${S.chat.map(msg).join("")||'<p class="empty">Diga oi, peça para abrir um app ou pergunte qualquer coisa.</p>'}</div>
+  <form class="bar" onsubmit="return send(event)"><input id="inp" placeholder="Pergunte ou peça algo ao Jarvis…" autocomplete="off">
+  <button type="button" class="ic" id="mic" title="Falar" onclick="mic()">${I("mic")}</button><button class="go" title="Enviar">${I("send")}</button></form></div>`;
+}
+function paint(){ const b=$("#msgs"); if(b){ b.innerHTML=S.chat.map(msg).join(""); b.scrollTop=b.scrollHeight; } }
+async function send(e){
+  e&&e.preventDefault(); const i=$("#inp"), t=i.value.trim(); if(!t||S.busy) return false;
+  i.value=""; S.busy=true; S.chat.push({role:"u",text:t},{role:"a",text:"…"}); paint();
+  const r=await api("chat",{text:t}); S.chat.pop();
+  S.chat.push({role:"a",text:r.reply||r.error,via:r.via}); S.busy=false; paint(); refresh(); return false;
+}
+async function mic(){
+  const b=$("#mic"); b.classList.add("rec"); toast("Ouvindo… fale agora.");
+  const r=await api("listen"); b.classList.remove("rec");
+  if(r.text){ $("#inp").value=r.text; send(); } else toast(r.error||"Não ouvi nada.");
+}
+async function loadChat(){ if(!S.chat.length) S.chat=await api("history"); }
+
+/* ---------- telas ---------- */
+const R={};
+R.inicio=async()=>{
+  await loadChat(); const c=S.st.counts||{}, u=S.st.user;
+  $("#main").innerHTML=`<h1>Olá${u?", "+esc(u):""}!</h1><p class="mute">Escreva ou diga "Jarvis"</p>
+  <div class="grid"><div>${chatBox()}</div><div class="col">${mediaCard()}
+  <div class="stats">
+   <button class="stat" onclick="go('lembretes')"><b>${c.reminders||0}</b><span class="mute">lembretes</span></button>
+   <button class="stat" onclick="go('tarefas')"><b>${c.tasks||0}</b><span class="mute">tarefas abertas</span></button>
+   <button class="stat" onclick="go('habitos')"><b>${c.habits||0}</b><span class="mute">hábitos</span></button>
+   <button class="stat" onclick="go('timers')"><b>${c.timers||0}</b><span class="mute">timers ativos</span></button></div></div></div>`;
+  paint(); $("#inp").focus();
+  await npSync(); S.tick=setInterval(npSync,2000);
+};
+R.conversa=async()=>{
+  await loadChat();
+  $("#main").innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h1>Conversa</h1><button class="sec danger" onclick="clearChat()">Limpar conversa</button></div>
+  <div style="margin-top:18px">${chatBox()}</div>`; paint(); $("#inp").focus();
+};
+async function clearChat(){ await api("clear_chat"); S.chat=[]; R.conversa(); }
+
+function mplay(a){
+  api("spotify_cmd",{action:a}).then(r=>{ if(!r||!r.ok) api("media",{action:a==="toggle"?"play":a}); });
+}
+function mvol(v){
+  api("spotify_state").then(d=>{
+    if(d && d.online) api("spotify_cmd",{action:"volume",value:v/100});
+    else api("volume",{level:v});
+  });
+}
+function nowCard(){
+  return `<div class="card"><h2>Tocando agora</h2>
+  <div class="np"><div class="np-art" id="np-art"></div><div style="min-width:0">
+    <div id="np-t" style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+    <div class="mute small" id="np-a">Spotify desconectado</div></div></div>
+  <div class="ctl"><button class="ic" onclick="mplay('prev')">${I("prev")}</button>
+  <button class="ic big" id="np-play" onclick="mplay('toggle')">${I("play")}</button>
+  <button class="ic" onclick="mplay('next')">${I("next")}</button></div>
+  <div class="bar2" style="margin:8px 0 0"><i id="np-bar" style="width:0%"></i></div>
+  <p class="mute small" id="np-src" style="margin-top:10px">Detectando o Spotify…</p></div>`;
+}
+async function npSync(){
+  const d = await api("spotify_state"); if(!$("#np-t")) return;
+  $("#np-t").textContent = d.title || "Nada tocando";
+  $("#np-a").textContent = d.online ? (d.artist || (d.playing ? "Spotify" : "Pausado")) : "Spotify desconectado — abra o Spotify";
+  $("#np-art").style.backgroundImage = d.art ? `url("${d.art}")` : "";
+  const p = d.duration ? Math.min(100, (d.position||0)/d.duration*100) : 0;
+  $("#np-bar").style.width = p + "%";
+  if ($("#np-play")) {
+    $("#np-play").innerHTML = (d.playing || d.playing === null) ? I("pause") : I("play");
+  }
+  if ($("#np-src")) {
+    const nome = {spicetify:"extensão Spicetify", windows:"Windows (SMTC)", janela:"janela do Spotify"}[d.source];
+    $("#np-src").textContent = d.online
+      ? (nome ? `Fonte: ${nome} · atualiza sozinho` : "")
+      : "Abra o Spotify para controlar a música por aqui.";
+  }
+}
+function mediaCard(){ return nowCard(); }
+R.musica=async()=>{
+  $("#main").innerHTML=`<h1>Música</h1><div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)"><div>${nowCard()}</div>
+  <div class="card"><h2>Tocar no Spotify</h2><p class="mute small">Com a extensão Spicetify ativa, toca de verdade. Sem ela, abre a busca. Também vale dizer "toca Legião Urbana".</p>
+  <form class="add" onsubmit="spot(event)"><input id="sq" placeholder="Artista ou música…"><button class="pri">Tocar</button></form>
+  <button class="sec" onclick="api('chat',{text:'abre spotify'})">Abrir Spotify</button>
+  <label class="mute small" style="display:block;margin-top:14px">Volume</label><input type="range" min="0" max="100" value="50" onchange="mvol(+this.value)"></div></div>`;
+  await npSync(); S.tick=setInterval(npSync,2000);
+};
+function spot(e){ e.preventDefault(); const q=$("#sq").value.trim(); if(q){ api("chat",{text:"toca "+q}); toast("Tocando "+q+"…"); } }
+
+const CFG={
+  memory:{ph:"Algo que o Jarvis deve saber sobre você…",empty:"Nada guardado. Diga \"lembra que...\" ou adicione aqui."},
+  task:{ph:"Nova tarefa…",empty:"Nenhuma tarefa. Respire."},
+  reminder:{ph:"Lembrar de…",mins:true,empty:"Nenhum lembrete."},
+  habit:{ph:"Novo hábito (ex.: beber água)…",empty:"Crie um hábito para acompanhar sua sequência."},
+  clip:{empty:"O histórico está vazio. Ative a gravação acima e copie algo."},
+  routine:{ph:"Nome da rotina (ex.: modo trabalho)",steps:true,empty:"Crie uma rotina: vários comandos executados de uma vez."}
+};
+async function listView(v){
+  const c=VIEWS[v], k=c.kind, f=CFG[k], items=await api("items",{kind:k});
+  let form="";
+  if(k==="clip") form=`<label class="tg card" style="margin:18px 0"><input type="checkbox" ${S.st.clip?"checked":""} onchange="setting('clip',this.checked)"><span>Guardar o que eu copio <span class="mute small">(atenção: senhas copiadas também ficam salvas neste PC)</span></span></label>`;
+  else form=`<form class="add" onsubmit="addItem(event,'${k}')"><input id="f1" placeholder="${f.ph}">${f.mins?'<input id="f2" type="number" min="1" value="10" style="max-width:110px" title="minutos">':""}${f.steps?'<textarea id="f3" rows="2" style="flex:2;min-width:220px" placeholder="Comandos separados por ; (ex.: abre spotify; abre chrome)"></textarea>':""}<button class="pri">Adicionar</button></form>`;
+  const rows=items.map(it=>{
+    let body=`<div class="t">${esc(it.text)}</div>`, lead="", tail="";
+    if(k==="task") lead=`<input type="checkbox" ${it.done?"checked":""} onchange="act('toggle',${it.id})">`, body=`<div class="t ${it.done?"done":""}">${esc(it.text)}</div>`;
+    if(k==="reminder") body=`<div class="t ${it.done?"done":""}">${esc(it.text)}<div class="mute small">${it.done?"disparado":"para"} ${fmt(it.due)}</div></div>`;
+    if(k==="habit") body=`<div class="t">${esc(it.text)}<div class="mute small">${it.info.streak||0} dia(s) seguido(s)</div></div>`, tail=it.today?'<span class="badge">feito hoje</span>':`<button class="sec" onclick="act('habit',${it.id})">Fiz hoje</button>`;
+    if(k==="memory") body=`<div class="t">${esc(it.text)}<div class="mute small">${fmt(it.ts)}</div></div>`;
+    if(k==="clip"){ S.clips[it.id]=it.text; body=`<div class="t">${esc(it.text.slice(0,240))}<div class="mute small">${fmt(it.ts)}</div></div>`; tail=`<button class="sec" onclick="act('copy',${it.id})">Copiar</button>`; }
+    if(k==="routine") body=`<div class="t"><b>${esc(it.text)}</b><div class="mute small">${esc(it.steps.join(" → "))}</div></div>`, tail=`<button class="pri" onclick="act('run',${it.id})">Executar</button>`;
+    return `<div class="row">${lead}${body}${tail}<button class="ic danger" style="width:34px;height:34px" title="Apagar" onclick="act('del',${it.id})">${I("x")}</button></div>`;
+  }).join("");
+  $("#main").innerHTML=`<h1>${c.t}</h1>${form}<div class="card">${rows||`<p class="empty">${f.empty}</p>`}</div>`;
+}
+for(const [v,c] of Object.entries(VIEWS)) if(c.kind) R[v]=()=>listView(v);
+async function addItem(e,kind){
+  e.preventDefault(); const a={kind,text:$("#f1").value};
+  if($("#f2")) a.minutes=$("#f2").value; if($("#f3")) a.steps=$("#f3").value;
+  const r=await api("add_item",a); if(r.error) return toast(r.error);
+  await refresh(); R[S.view]();
+}
+async function act(a,id){
+  if(a==="del") await api("del_item",{id}); if(a==="toggle") await api("toggle_item",{id});
+  if(a==="habit") toast(await api("habit_done",{id}));
+  if(a==="run"){ const r=await api("run_routine",{id}); toast(r.reply); }
+  if(a==="copy"){ try{ await navigator.clipboard.writeText(S.clips[id]); toast("Copiado."); }catch(e){ toast("Não consegui copiar."); } return; }
+  await refresh(); R[S.view]();
+}
+async function setting(k,v){ await api("set_setting",{key:k,value:v}); refresh(); }
+
+R.timers=async()=>{
+  const draw=async()=>{
+    const ts=await api("timers"), end=Date.now()/1000;
+    $("#tl").innerHTML=ts.map(t=>`<div class="row"><div class="t"><b data-end="${end+t.left}" style="font-size:22px">${mmss(t.left)}</b><div class="mute small">${esc(t.label||"Timer")}</div></div><button class="ic danger" style="width:34px;height:34px" onclick="api('cancel_timer',{id:${t.id}}).then(()=>R.timers())">${I("x")}</button></div>`).join("")||'<p class="empty">Nenhum timer ativo. Diga "timer de 5 minutos".</p>';
+  };
+  $("#main").innerHTML=`<h1>Timers</h1><form class="add" onsubmit="addTimer(event)"><input id="tm" type="number" min="0.1" step="any" value="5" style="max-width:110px"><input id="tn" placeholder="Nome (opcional)"><button class="pri">Iniciar (minutos)</button></form><div class="card" id="tl"></div>`;
+  await draw(); let n=0;
+  S.tick=setInterval(()=>{ document.querySelectorAll("[data-end]").forEach(b=>{ b.textContent=mmss(Math.max(0,Math.round(b.dataset.end-Date.now()/1000))); }); if(++n%5===0) draw(); },1000);
+};
+async function addTimer(e){ e.preventDefault(); await api("add_timer",{minutes:$("#tm").value,label:$("#tn").value}); await refresh(); R.timers(); }
+
+R.ferramentas=async()=>{
+  const r=await api("agent_log",{lines:250});
+  $("#main").innerHTML=`<h1>Ferramentas</h1>
+  <p class="mute" style="max-width:680px">O Jarvis tem acesso total a este PC. Toda ferramenta executada fica registrada em <code>data/agent.log</code> — comando, argumentos e resultado. O mais recente fica no fim.</p>
+  <div class="card" style="margin-top:18px"><pre class="log">${esc(r.text||"")}</pre></div>`;
+};
+
+const pcTile=(id,label)=>`<div class="tile"><div class="k">${label}</div><div class="v" id="t-${id}">—</div><div class="s" id="ts-${id}"></div><div id="tsp-${id}"></div></div>`;
+function sparkSVG(vals,o={}){
+  const w=100,h=34,vs=(vals&&vals.length)?vals:[0];
+  const max=o.scale||Math.max(...vs,0.001);
+  const pts=vs.map((v,i)=>[vs.length>1?i*w/(vs.length-1):0,h-2-Math.min(1,Math.max(0,v/max))*(h-6)]);
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  return `<svg class="spark ${o.blue?"blue":""}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><path class="area" d="${line} L ${w} ${h} L 0 ${h} Z"/><path class="line" d="${line}"/></svg>`;
+}
+const pcRate=mb=>mb>=1?mb.toFixed(1)+" MB/s":Math.round(mb*1024)+" KB/s";
+const pcUptime=s=>{const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?`${d}d ${h}h ${m}min`:h?`${h}h ${m}min`:`${m}min`;};
+
+R.pc=async()=>{
+  $("#main").innerHTML=`<div class="pchead"><h1>Meu PC</h1><span class="chip"><i class="dot-live"></i> ao vivo</span></div>
+  <div class="pc-hero">${pcTile("cpu","Processador")}${pcTile("ram","Memória")}${pcTile("disk","Disco")}${pcTile("net","Rede")}</div>
+  <div class="pc-grid">
+    <div class="col">
+      <div class="card"><h2>Processador</h2>
+        <div class="kv"><span>Modelo</span><b id="c-name">—</b></div>
+        <div class="kv"><span>Núcleos / threads</span><b id="c-cores">—</b></div>
+        <div class="kv"><span>Relógio</span><b id="c-freq">—</b></div>
+        <div class="kv" id="c-temp-row" style="display:none"><span>Temperatura</span><b id="c-temp">—</b></div>
+        <div class="subh">Carga por núcleo</div><div class="cores" id="p-cores"></div>
+      </div>
+      <div class="card"><h2>Memória</h2>
+        <div class="kv"><span>Em uso</span><b id="m-use">—</b></div>
+        <div class="meter"><i id="m-bar" style="width:0%"></i></div>
+        <div class="kv"><span>Total</span><b id="m-total">—</b></div>
+        <div class="kv"><span>Disponível</span><b id="m-free">—</b></div>
+        <div class="kv" id="m-swap-row" style="display:none"><span>Swap</span><b id="m-swap">—</b></div>
+      </div>
+      <div class="card"><h2>Discos</h2><div id="p-disks"></div></div>
+    </div>
+    <div class="col">
+      <div class="card"><h2>Sistema</h2>
+        <div class="kv"><span>Computador</span><b id="s-host">—</b></div>
+        <div class="kv"><span>Usuário</span><b id="s-user">—</b></div>
+        <div class="kv"><span>Windows</span><b id="s-os">—</b></div>
+        <div class="kv"><span>Modelo</span><b id="s-model">—</b></div>
+        <div class="kv"><span>Placa-mãe</span><b id="s-board">—</b></div>
+        <div class="kv"><span>Ligado há</span><b id="s-up">—</b></div>
+        <div class="kv"><span>Placa de vídeo</span><b id="s-gpu">—</b></div>
+      </div>
+      <div class="card"><h2>Rede</h2>
+        <div class="kv"><span>Download</span><b id="n-down">—</b></div>
+        <div class="kv"><span>Upload</span><b id="n-up">—</b></div>
+        <div class="kv"><span>IP local</span><b id="n-ip">—</b></div>
+        <div class="kv"><span>Conexão</span><b id="n-if">—</b></div>
+      </div>
+      <div class="card" id="bat-card" style="display:none"><h2>Bateria</h2><div id="p-bat"></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px"><h2 id="pr-h">Processos</h2>
+    <div class="proc2">
+      <div><div class="subh">Mais CPU</div><table class="tbl" id="pr-cpu"></table></div>
+      <div><div class="subh">Mais memória</div><table class="tbl" id="pr-mem"></table></div>
+    </div>
+  </div>`;
+
+  const put=(sel,txt)=>{const e=$(sel); if(e) e.textContent=txt;};
+  const tick=async()=>{
+    const d=await api("sysinfo"); if(!$("#t-cpu")) return;
+    if(d.error){ $("#main").innerHTML=`<h1>Meu PC</h1><div class="banner bad" style="margin-top:18px">${esc(d.error)}</div>`; return; }
+    const p=d.processor, m=d.memory, s=d.system, st=d.storage, n=d.network;
+
+    /* telhas */
+    $("#t-cpu").innerHTML=d.cpu.toFixed(0)+'<small>%</small>';
+    put("#ts-cpu",`${p.cores} núcleos · ${p.threads} threads · ${(p.freq/1000).toFixed(2)} GHz`);
+    $("#tsp-cpu").innerHTML=sparkSVG(d.history.cpu,{scale:100});
+    $("#t-ram").innerHTML=m.percent.toFixed(0)+'<small>%</small>';
+    put("#ts-ram",`${m.used_gb.toFixed(1)} de ${m.total_gb.toFixed(1)} GB`);
+    $("#tsp-ram").innerHTML=`<div class="meter" style="margin-top:14px"><i style="width:${m.percent}%"></i></div>`;
+    $("#t-disk").innerHTML=d.disk.toFixed(0)+'<small>%</small>';
+    const d0=st.disks[0];
+    put("#ts-disk",`${d0?d0.free_gb.toFixed(0)+" GB livres · ":""}E/S ${pcRate(st.read+st.write)}`);
+    $("#tsp-disk").innerHTML=`<div class="meter" style="margin-top:14px"><i style="width:${d.disk}%"></i></div>`;
+    $("#t-net").innerHTML=`<span style="font-size:19px">↓ ${pcRate(n.down)}</span>`;
+    put("#ts-net",`↑ ${pcRate(n.up)}${n.ssid?" · "+n.ssid:""}`);
+    $("#tsp-net").innerHTML=sparkSVG(d.history.net,{blue:true});
+
+    /* processador */
+    put("#c-name",p.name);
+    put("#c-cores",`${p.cores} / ${p.threads}`);
+    put("#c-freq",p.freq?(p.freq/1000).toFixed(2)+" GHz"+(p.max_freq&&Math.abs(p.max_freq-p.freq)>50?` (máx ${(p.max_freq/1000).toFixed(2)})`:""):"—");
+    if(p.temp!=null){ $("#c-temp-row").style.display=""; put("#c-temp",p.temp.toFixed(0)+" °C"); }
+    const cores=$("#p-cores");
+    if(cores){
+      if(cores.children.length!==p.per_core.length){
+        cores.innerHTML=p.per_core.map((v,i)=>`<div class="core" title="Núcleo ${i}"><i style="height:${v}%"></i><span>${Math.round(v)}</span></div>`).join("");
+      } else {
+        p.per_core.forEach((v,i)=>{const el=cores.children[i]; el.firstElementChild.style.height=v+"%"; el.lastElementChild.textContent=Math.round(v);});
+      }
+    }
+
+    /* memória */
+    put("#m-use",`${m.used_gb.toFixed(1)} GB (${m.percent.toFixed(0)}%)`);
+    $("#m-bar").style.width=m.percent+"%";
+    put("#m-total",m.total_gb.toFixed(1)+" GB");
+    put("#m-free",m.free_gb.toFixed(1)+" GB");
+    if(m.swap_percent==null){ $("#m-swap-row").style.display="none"; }
+    else { $("#m-swap-row").style.display=""; put("#m-swap",`${m.swap_used_gb.toFixed(1)} de ${m.swap_total_gb.toFixed(1)} GB`); }
+
+    /* discos */
+    const parts=st.disks.map(x=>`<div class="kv"><span>${esc(x.mount)}${x.label?" · "+esc(x.label):""}</span><b>${x.free_gb.toFixed(0)} GB livres · ${x.total_gb.toFixed(0)} GB</b></div><div class="meter"><i style="width:${x.percent}%"></i></div>`).join("");
+    const phys=(st.physical||[]).map(x=>`<div class="kv"><span>${esc(x.name)}</span><b>${[x.media,x.bus,x.gb+" GB"].filter(Boolean).join(" · ")}</b></div>`).join("");
+    $("#p-disks").innerHTML=parts+(phys?`<div class="subh">Discos físicos</div>`+phys:"")+
+      `<div class="kv"><span>Leitura</span><b>${pcRate(st.read)}</b></div><div class="kv"><span>Gravação</span><b>${pcRate(st.write)}</b></div>`;
+
+    /* sistema */
+    put("#s-host",s.host||"—"); put("#s-user",s.user||"—");
+    put("#s-os",(s.os||"—")+(s.build?" · "+s.build:""));
+    put("#s-model",s.model||"—"); put("#s-board",s.board||"—");
+    put("#s-up",s.uptime?(pcUptime(s.uptime)+(s.boot?" · desde "+s.boot:"")):"—");
+    put("#s-gpu",(d.graphics&&d.graphics.length)?d.graphics.map(g=>g.name+(g.vram_gb?` · ${g.vram_gb} GB`:"")).join(" / "):"—");
+
+    /* rede */
+    put("#n-down",pcRate(n.down)); put("#n-up",pcRate(n.up));
+    put("#n-ip",n.ip||"—");
+    put("#n-if",(n.iface||"—")+(n.ssid?" · "+n.ssid:""));
+
+    /* bateria */
+    const b=d.battery_info;
+    if(b){
+      $("#bat-card").style.display="";
+      const left=b.secsleft!=null?` · ${Math.floor(b.secsleft/3600)}h ${Math.floor(b.secsleft%3600/60)}min restantes`:"";
+      $("#p-bat").innerHTML=`<div class="kv"><span>Carga</span><b>${b.percent.toFixed(0)}%</b></div><div class="meter"><i style="width:${b.percent}%"></i></div><div class="kv"><span>Estado</span><b>${b.plugged?"na tomada":"na bateria"}${left}</b></div>`;
+    }
+
+    /* processos */
+    put("#pr-h",`Processos · ${d.processes.count} em execução`);
+    const procRows=(arr,unit)=>{
+      const max=Math.max(...arr.map(y=>unit==="cpu"?y.cpu:y.mem),0.1);
+      return arr.map(x=>{
+        const val=unit==="cpu"?x.cpu:x.mem;
+        const txt=unit==="cpu"?x.cpu.toFixed(1)+"%":(x.mem>=1024?(x.mem/1024).toFixed(1)+" GB":x.mem.toFixed(0)+" MB");
+        return `<tr><td class="nm">${esc(x.name)}</td><td class="num">${txt}</td><td class="bar_mini"><div><i style="width:${Math.min(100,val/max*100)}%"></i></div></td></tr>`;
+      }).join("")||`<tr><td class="mute small">—</td></tr>`;
+    };
+    $("#pr-cpu").innerHTML=procRows(d.processes.by_cpu,"cpu");
+    $("#pr-mem").innerHTML=procRows(d.processes.by_mem,"mem");
+  };
+  await tick(); S.tick=setInterval(tick,1500);
+};
+
+R.cerebro=async()=>{
+  const [b,s,v]=await Promise.all([api("brain_info"),api("state"),api("voice_info")]); S.st=s;
+  const st=b.status;
+  const prov=b.providers.map(p=>`<div class="card prov"><div class="h"><b>${esc(p.label)}</b><span class="badge ${p.free?"":"paid"}">${p.free?"grátis":"pago"}</span>
+    ${p.has_key||(p.nokey&&p.on)?`<span class="badge">${p.on?"ativo":"desligado"}</span>`:""}</div>
+    <div class="mute small">${esc(p.note)}</div>
+    <div class="f"><input id="k_${p.id}" type="password" placeholder="${p.nokey?"não precisa de chave":p.has_key?"chave salva (…"+esc(p.tail)+")":"cole a chave de API"}" ${p.nokey?"disabled":""}>
+    <input id="m_${p.id}" value="${esc(p.model)}" placeholder="modelo"></div>
+    <div class="a"><label class="tg"><input type="checkbox" id="o_${p.id}" ${p.on?"checked":""}> Usar esta IA</label>
+    <button class="sec" onclick="saveProv('${p.id}')">Salvar</button><button class="sec" onclick="testProv('${p.id}')">Testar</button><button class="sec" onclick="setMode('${p.id}')">${b.mode===p.id?"Fixada":"Usar só esta"}</button>
+    <button class="sec" onclick="api('open',{url:'${p.link}'})">Pegar chave: ${esc(p.link)}</button><span class="small" id="r_${p.id}"></span></div></div>`).join("");
+  $("#main").innerHTML=`<h1>Cérebro</h1>
+  <p class="mute" style="max-width:640px">É o cérebro do Jarvis. Comandos simples (abrir apps, volume, timers) funcionam mesmo sem IA, e o agente usa ferramentas reais quando você pede algo maior.</p>
+  <div class="banner ${st?"":"bad"}">${st?`Funcionando com <b>${esc(st.label)}</b> · modelo ${esc(st.model)}`:"Nenhuma IA ativa. Cole uma chave grátis abaixo (Groq ou Gemini são os caminhos mais rápidos)."}</div>
+  <h2>Como o Jarvis escolhe a IA</h2>
+  <div class="opts"><button class="opt ${b.mode==="auto"?"on":""}" onclick="setMode('auto')"><b>Automático</b><div class="mute small">Usa a primeira IA ativa e troca sozinha para a próxima se uma falhar ou atingir o limite grátis.</div></button>
+  <button class="opt ${b.mode!=="auto"?"on":""}" onclick="setMode('${b.mode!=="auto"?b.mode:(st?st.id:"groq")}')"><b>Eu escolho</b><div class="mute small">Usa só ${b.mode!=="auto"?"a IA escolhida: "+esc((b.providers.find(p=>p.id===b.mode)||{}).label):"uma IA fixa (a primeira ativa)"}. Para mudar, clique em "Usar só esta" no card.</div></button></div>
+  <h2>IAs disponíveis</h2>${prov}
+  <h2 style="margin-top:22px">Ajustes</h2><div class="card">
+   <div class="add" style="margin-top:0"><input id="un" placeholder="Como devo te chamar?" value="${esc(s.user||"")}"><button class="pri" onclick="setting('user',$('#un').value).then(()=>toast('Nome salvo.'))">Salvar nome</button></div>
+   <label class="tg" style="margin:8px 0"><input type="checkbox" ${s.voice_reply?"checked":""} onchange="setting('voice_reply',this.checked)"> Responder falando <span class="mute small">(voz neural — só no chat e quando você me chama)</span></label>
+   <label class="tg"><input type="checkbox" ${s.wake?"checked":""} onchange="setting('wake',this.checked)"> Ouvir "Jarvis" o tempo todo (precisa de SpeechRecognition e PyAudio)</label>
+   <div class="vozbox">
+     <div class="subh" style="margin-top:0">Voz</div>
+     <div class="vrow"><select id="vsel">${v.voices.map(x=>`<option value="${x.id}" ${x.id===v.voice?"selected":""}>${esc(x.name)} — ${esc(x.note)}</option>`).join("")}</select>
+       <button class="sec" onclick="voiceSave()">Salvar</button>
+       <button class="sec" onclick="voiceTest()">Ouvir exemplo</button>
+       <button class="sec" onclick="voiceStop()">Parar</button></div>
+     <div class="vrate"><span class="mute small" style="flex:none">Velocidade</span><input id="vrate" type="range" min="-30" max="30" step="2" value="${v.rate}" oninput="$('#vratev').textContent=(this.value>0?'+':'')+this.value+'%'"><b id="vratev">${v.rate>0?"+":""}${v.rate}%</b></div>
+     <p class="mute small" style="margin-top:10px">Motor: <b style="color:var(--text);font-weight:500">${v.edge?"edge-tts (vozes neurais)":"SAPI do Windows (offline)"}</b>. Sem internet, cai sozinho para a voz local do Windows.</p>
+   </div></div>`;
+};
+async function saveProv(id,quiet){
+  const r=await api("set_provider",{id,key:$("#k_"+id).value,model:$("#m_"+id).value,on:$("#o_"+id).checked});
+  if(r.error) return toast(r.error); if(!quiet) toast("Salvo."); await refresh(); R.cerebro();
+}
+async function testProv(id){
+  await api("set_provider",{id,key:$("#k_"+id).value,model:$("#m_"+id).value,on:$("#o_"+id).checked});
+  const el=$("#r_"+id); el.textContent="testando…"; el.style.color="var(--mute)";
+  const r=await api("test_provider",{id}); el.textContent=r.ok?"funcionou: "+r.text:r.text; el.style.color=r.ok?"var(--acc)":"var(--warn)";
+}
+async function setMode(m){ await api("set_mode",{mode:m}); await refresh(); R.cerebro(); }
+async function voiceSave(){
+  const r=await api("set_voice",{voice_name:$("#vsel").value,rate:Number($("#vrate").value)});
+  if(r.error) return toast(r.error);
+  toast("Voz salva."); await api("test_voice",{}); await refresh(); R.cerebro();
+}
+async function voiceTest(){ await api("test_voice",{}); }
+async function voiceStop(){ await api("stop_voice",{}); toast("Parado."); }
+
+/* ---------- eventos em segundo plano ---------- */
+setInterval(async()=>{
+  const r=await api("poll"); for(const e of r.events||[]){
+    if(e.type==="alert") toast(e.text);
+    if(e.type==="chat"){ S.chat.push({role:"u",text:e.user},{role:"a",text:e.reply,via:e.via}); paint(); }
+    if(e.type==="focus"){ if(S.view!=="inicio") go("inicio"); setTimeout(()=>{ const i=$("#inp"); if(i){ i.focus(); i.select(); } },160); }
+  }
+  if((r.events||[]).length) refresh();
+},2000);
+setInterval(refresh,15000);
+refresh().then(()=>{ const h=location.hash.replace("#",""); go(R[h]?h:"inicio"); });
+</script>
+</body>
+</html>

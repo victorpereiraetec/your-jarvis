@@ -1,0 +1,21 @@
+# Essenciais
+requests
+pywebview
+psutil
+# Estado real do Spotify pelo Windows (SMTC) - sem precisar de extensao
+winrt-runtime
+winrt-Windows.Media.Control
+winrt-Windows.Foundation
+winrt-Windows.Foundation.Collections
+winrt-Windows.Storage.Streams
+# Opcionais: volume exato, print de tela, historico de copiados
+pycaw
+comtypes
+pillow
+pyperclip
+# Voz: vozes neurais (edge-tts), tocar o audio (pygame), ouvir o microfone, plano B offline
+edge-tts
+pygame
+SpeechRecognition
+PyAudio
+pyttsx3
